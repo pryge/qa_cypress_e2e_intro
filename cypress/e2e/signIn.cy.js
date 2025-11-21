@@ -1,16 +1,27 @@
 /// <reference types="cypress" />
+const { faker } = require('@faker-js/faker');
 
-const { generateUser } = require('../support/generateUser');
+describe('Sign In', () => {
+  beforeEach(() => {
+    cy.visit('https://conduit.mate.academy/user/login');
+  });
 
-describe('Sign In page', () => {
-  it('should visit login in page', () => {
-    cy.visit('/#/Login');
+  it('should provide an abilty to log in ', () => {
+    const username = 'a' + faker.internet.userName().toLowerCase();
+    const email = faker.internet.email().toLowerCase();
+    const password = 'Create1234!';
 
-    const { email, password } = generateUser();
+    cy.request('POST', 'https://conduit.mate.academy/api/users', {
+      user: {
+        username,
+        email,
+        password
+      }
+    });
 
-    cy.get('[placeholder="Email"]').type(email);
-    cy.get('[placeholder="Password"]').type(password);
-
-    cy.get('button[type="submit"]').click();
+    cy.get(':nth-child(1) > .form-control').type(email);
+    cy.get(':nth-child(2) > .form-control').type(password);
+    cy.contains('button', 'Sign in').click();
+    cy.get('.navbar .nav-link[href^="/profile/"]').should('contain', username);
   });
 });
